@@ -3,12 +3,57 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --brand-primary: #4338ca;
+    --brand-hover: #3730a3;
+    --bg-main: #f8fafc;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply font-sans bg-slate-50 text-slate-900;
+    @apply font-sans bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900;
+  }
+
+  /* Accessible standard focus ring */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-indigo-600 ring-offset-2 ring-offset-white;
   }
 }
 
-/* Smooth transitions & custom scrollbar */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 border border-indigo-700 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 active:bg-rose-800 border border-rose-700 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-success {
+    @apply inline-flex items-center justify-center gap-2 h-11 px-5 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 border border-emerald-700 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-sm-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 active:bg-slate-100 border border-slate-200 shadow-xs transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-sm-primary {
+    @apply inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-xl text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 border border-indigo-700 shadow-xs transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .card-surface {
+    @apply bg-white rounded-2xl border border-slate-200/90 shadow-card p-6 sm:p-7;
+  }
+}
+
+/* Custom subtle scrollbar */
 * {
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;

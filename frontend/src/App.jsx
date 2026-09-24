@@ -1,7 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, Link } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth } from './auth/AuthContext';
+import { AuthProvider } from './auth/AuthContext';
 import { RequireAuth } from './auth/RequireAuth';
 import { Navbar } from './components/Navbar';
 import { Login } from './pages/Login';
@@ -14,10 +14,9 @@ import { MatchDetail } from './pages/MatchDetail';
 import { MyPosts } from './pages/MyPosts';
 import { PrivacyPanel } from './pages/PrivacyPanel';
 import { NotFound } from './pages/NotFound';
-import { RotateCcw } from 'lucide-react';
+import { ShieldCheck, Lock, ExternalLink, Heart, Shield } from 'lucide-react';
 
 const AppLayout = () => {
-  const { resetDemoData } = useAuth();
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
@@ -97,20 +96,85 @@ const AppLayout = () => {
         </Routes>
       </main>
 
-      {/* Global Campus Portal Footer */}
+      {/* Professional Campus Portal Footer */}
       {!isAuthPage && (
-        <footer className="bg-white border-t border-slate-200/80 py-5 text-center text-xs text-slate-500">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p>© 2026 Campus Lost & Found System — Privacy-Preserving College Network</p>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={resetDemoData}
-                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-700 font-medium transition-colors"
-                title="Reset local demo dataset"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Demo Data</span>
-              </button>
+        <footer className="bg-white border-t border-slate-200/80 mt-12 text-slate-600">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+              
+              {/* Column 1: Brand & Mission */}
+              <div className="md:col-span-5 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <span className="font-bold text-slate-900 text-base">
+                    Campus <span className="text-indigo-600">Lost & Found</span>
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
+                  A privacy-preserving college portal enabling students to safely report, match, and recover lost belongings with anti-fraud verification.
+                </p>
+                <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
+                  <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Verified College Security Network</span>
+                </div>
+              </div>
+
+              {/* Column 2: Quick Links */}
+              <div className="md:col-span-3 space-y-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                  Quick Actions
+                </h4>
+                <ul className="space-y-2 text-xs">
+                  <li>
+                    <Link to="/home" className="hover:text-indigo-600 transition-colors">
+                      Home Dashboard
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/lost" className="hover:text-rose-600 transition-colors">
+                      Report Lost Item
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/found" className="hover:text-emerald-600 transition-colors">
+                      Report Found Item
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/matches" className="hover:text-indigo-600 transition-colors">
+                      View Smart Matches
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Column 3: Trust & Privacy */}
+              <div className="md:col-span-4 space-y-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+                  Privacy Safeguards
+                </h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Found items are never broadcast publicly. All contact details stay encrypted until the owner passes the secret challenge question.
+                </p>
+                <div>
+                  <Link
+                    to="/privacy"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                  >
+                    <span>Read Data Protection Policy</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Bottom Copyright & Safety Banner */}
+            <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+              <p>© 2026 Campus Lost & Found System. All rights reserved.</p>
+              <p className="text-[11px]">Designed for Student Safety & Data Privacy</p>
             </div>
           </div>
         </footer>
