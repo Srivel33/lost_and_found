@@ -295,6 +295,40 @@ const checkAndCreateMatchesForFound = (foundPost) => {
   saveToStorage(STORAGE_KEYS.NOTIFICATIONS, notifications);
 };
 
+export const previewMatches = (lostPostData, currentUserId) => {
+  const foundList = getFromStorage(STORAGE_KEYS.FOUND);
+  const matches = [];
+
+  for (const foundPost of foundList) {
+    if (foundPost.status === POST_STATUSES.WITHDRAWN || foundPost.status === POST_STATUSES.RETURNED) continue;
+    if (currentUserId && foundPost.userId === currentUserId) continue;
+
+    const matchResult = scoreMatchPair(lostPostData, foundPost);
+    if (matchResult) {
+      matches.push({
+        id: foundPost.id,
+        category: foundPost.category,
+        itemName: foundPost.itemName,
+        color: foundPost.color,
+        location: foundPost.location,
+        timeFound: foundPost.timeFound,
+        score: matchResult.score,
+        band: matchResult.band,
+        whyMatched: matchResult.whyMatched,
+        hasPhoto: Boolean(foundPost.photo)
+      });
+    }
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+
+  return {
+    count: matches.length,
+    topMatch: matches[0] || null,
+    matches: matches.slice(0, 3)
+  };
+};
+
 // Match queries with strict privacy enforcement
 export const getMyMatches = (userId) => {
   const matches = getFromStorage(STORAGE_KEYS.MATCHES);

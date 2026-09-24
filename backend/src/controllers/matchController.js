@@ -1,5 +1,17 @@
 import { db } from '../config/db.js';
 import { POST_STATUSES } from '../config/constants.js';
+import { previewMatchesForLostPost } from '../services/matchingService.js';
+
+export const previewMatches = (req, res) => {
+  try {
+    const previewData = req.body || {};
+    const result = previewMatchesForLostPost(previewData, req.user?.id);
+    return res.json(result);
+  } catch (error) {
+    console.error('Preview matches error:', error);
+    return res.status(500).json({ error: 'Failed to preview matches.' });
+  }
+};
 
 export const getMyMatches = (req, res) => {
   try {

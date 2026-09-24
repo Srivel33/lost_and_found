@@ -192,6 +192,18 @@ export const api = {
   },
 
   // Matches
+  async previewMatches(postData) {
+    try {
+      return await fetchApi('/matches/preview', {
+        method: 'POST',
+        body: JSON.stringify(postData)
+      });
+    } catch (err) {
+      const user = mockStore.getSessionUser();
+      return mockStore.previewMatches(postData, user?.id);
+    }
+  },
+
   async getMyMatches() {
     try {
       return await fetchApi('/matches/my');

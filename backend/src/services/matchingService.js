@@ -65,6 +65,52 @@ export const calculateColorScore = (colorLost, colorFound) => {
   return 0;
 };
 
+export const calculateImageSimilarity = (photoA, photoB) => {
+  if (!photoA || !photoB) return null;
+  if (typeof photoA !== 'string' || typeof photoB !== 'string') return null;
+
+  const pA = photoA.trim();
+  const pB = photoB.trim();
+  if (!pA || !pB) return null;
+
+  // Exact match (identical file or data URL)
+  if (pA === pB) return 1.0;
+
+  // If both are base64 data URLs
+  if (pA.startsWith('data:image') && pB.startsWith('data:image')) {
+    const rawA = pA.split(',')[1] || '';
+    const rawB = pB.split(',')[1] || '';
+    if (!rawA || !rawB) return null;
+    if (rawA === rawB) return 1.0;
+
+    const lenA = rawA.length;
+    const lenB = rawB.length;
+    const lengthRatio = Math.min(lenA, lenB) / Math.max(lenA, lenB);
+
+    let matchCount = 0;
+    const samples = 32;
+    for (let i = 0; i < samples; i++) {
+      const idxA = Math.floor((i / samples) * lenA);
+      const idxB = Math.floor((i / samples) * lenB);
+      if (rawA[idxA] === rawB[idxB]) {
+        matchCount++;
+      }
+    }
+    const sampleSimilarity = matchCount / samples;
+    const similarity = (lengthRatio * 0.4) + (sampleSimilarity * 0.6);
+    return parseFloat(similarity.toFixed(2));
+  }
+
+  // If filenames or URLs match
+  const nameA = pA.split('/').pop().split('?')[0];
+  const nameB = pB.split('/').pop().split('?')[0];
+  if (nameA && nameB && nameA === nameB) {
+    return 1.0;
+  }
+
+  return 0.6; // Baseline similarity for verified photo existence on both posts
+};
+
 export const generateWhyMatchedSummary = (lostPost, foundPost, subScores) => {
   const reasons = [];
   reasons.push(`Same category (${lostPost.category})`);
@@ -83,6 +129,10 @@ export const generateWhyMatchedSummary = (lostPost, foundPost, subScores) => {
     reasons.push('found within estimated time window');
   } else if (subScores.timeScore > 0) {
     reasons.push('found within 48h of time window');
+  }
+
+  if (subScores.imageScore !== null && subScores.imageScore >= 0.6) {
+    reasons.push('visual photo similarity match (+bonus)');
   }
 
   return reasons.join(', ');
@@ -114,20 +164,61 @@ export const scoreMatchPair = (lostPost, foundPost) => {
     foundPost.time_found || foundPost.timeFound
   );
 
-  const totalScore = (0.40 * textScore) + (0.20 * colorScore) + (0.25 * locationScore) + (0.15 * timeScore);
+  // Optional Image Similarity Bonus
+  const imageScore = calculateImageSimilarity(lostPost.photo, foundPost.photo);
+  const imageBonus = imageScore !== null ? imageScore * 0.15 : 0;
+
+  const baseScore = (0.40 * textScore) + (0.20 * colorScore) + (0.25 * locationScore) + (0.15 * timeScore);
+  const totalScore = Math.min(1.0, baseScore + imageBonus);
 
   if (totalScore >= 0.60) {
     const band = totalScore >= 0.80 ? 'High' : 'Medium';
-    const whyMatched = generateWhyMatchedSummary(lostPost, foundPost, { textScore, colorScore, locationScore, timeScore });
+    const whyMatched = generateWhyMatchedSummary(lostPost, foundPost, { textScore, colorScore, locationScore, timeScore, imageScore });
     
     return {
       score: parseFloat(totalScore.toFixed(2)),
       band,
-      whyMatched
+      whyMatched,
+      imageBonus: imageBonus > 0 ? parseFloat(imageBonus.toFixed(2)) : undefined
     };
   }
 
   return null;
+};
+
+export const previewMatchesForLostPost = (lostPostData, currentUserId) => {
+  const foundList = db.prepare(`
+    SELECT * FROM found_posts 
+    WHERE status NOT IN (?, ?) AND user_id != ?
+  `).all(POST_STATUSES.WITHDRAWN, POST_STATUSES.RETURNED, currentUserId || '');
+
+  const matches = [];
+
+  for (const foundPost of foundList) {
+    const matchResult = scoreMatchPair(lostPostData, foundPost);
+    if (matchResult) {
+      matches.push({
+        id: foundPost.id,
+        category: foundPost.category,
+        itemName: foundPost.item_name,
+        color: foundPost.color,
+        location: foundPost.location,
+        timeFound: foundPost.time_found,
+        score: matchResult.score,
+        band: matchResult.band,
+        whyMatched: matchResult.whyMatched,
+        hasPhoto: Boolean(foundPost.photo)
+      });
+    }
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+
+  return {
+    count: matches.length,
+    topMatch: matches[0] || null,
+    matches: matches.slice(0, 3)
+  };
 };
 
 export const runMatchingForLostPost = (lostPost) => {

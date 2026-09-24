@@ -5,7 +5,8 @@ import {
   submitHiddenQuestionAnswer,
   getVerifiedContact,
   confirmMatch,
-  rejectMatch
+  rejectMatch,
+  previewMatches
 } from '../controllers/matchController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -13,6 +14,7 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.post('/preview', previewMatches);
 router.get('/my', getMyMatches);
 router.get('/:id', getMatchDetail);
 router.post('/:id/answer', submitHiddenQuestionAnswer);

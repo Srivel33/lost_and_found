@@ -4,6 +4,7 @@ import {
   calculateLocationScore,
   calculateTimeScore,
   calculateColorScore,
+  calculateImageSimilarity,
   scoreMatchPair
 } from '../api/matching';
 
@@ -140,6 +141,46 @@ describe('Matching Scoring Engine', () => {
 
       const match = scoreMatchPair(lostPost, foundPost);
       expect(match).toBeNull();
+    });
+  });
+
+  describe('Optional Image Similarity Bonus', () => {
+    it('returns null if either photo is missing', () => {
+      expect(calculateImageSimilarity(null, 'data:image/png;base64,123')).toBeNull();
+      expect(calculateImageSimilarity('data:image/png;base64,123', undefined)).toBeNull();
+    });
+
+    it('returns 1.0 for identical photo sources', () => {
+      const photo = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      expect(calculateImageSimilarity(photo, photo)).toBe(1.0);
+    });
+
+    it('awards an image bonus when matching photo is provided', () => {
+      const lostPost = {
+        category: 'earphones',
+        itemName: 'Earbuds Case',
+        description: 'black earbuds',
+        color: 'Black',
+        location: 'Library',
+        timeStart: '2026-09-24T08:00:00.000Z',
+        timeEnd: '2026-09-24T09:00:00.000Z',
+        photo: 'https://campus.edu/photos/earbuds_case.jpg'
+      };
+
+      const foundPost = {
+        category: 'earphones',
+        itemName: 'Earbuds Case',
+        description: 'black earbuds',
+        color: 'Black',
+        location: 'Library',
+        timeFound: '2026-09-24T08:30:00.000Z',
+        photo: 'https://campus.edu/photos/earbuds_case.jpg'
+      };
+
+      const matchWithImage = scoreMatchPair(lostPost, foundPost);
+      expect(matchWithImage).not.toBeNull();
+      expect(matchWithImage.imageBonus).toBeGreaterThan(0);
+      expect(matchWithImage.whyMatched).toContain('visual photo similarity');
     });
   });
 });

@@ -15,6 +15,21 @@ async function runTests() {
   const meRes = await fetch(`${BASE}/auth/me`, { headers });
   console.log('Me:', await meRes.json());
 
+  console.log('\n--- Testing /matches/preview (Instant Live-Match Radar) ---');
+  const previewRes = await fetch(`${BASE}/matches/preview`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      category: 'earphones',
+      location: 'Library',
+      color: 'Black',
+      itemName: 'Black Earbuds',
+      timeStart: '2026-09-24T08:00:00.000Z'
+    })
+  });
+  const previewData = await previewRes.json();
+  console.log('Live Preview Count:', previewData.count, 'Top Match Band:', previewData.topMatch?.band, 'Score:', previewData.topMatch?.score);
+
   console.log('\n--- Testing /matches/my ---');
   const matchesRes = await fetch(`${BASE}/matches/my`, { headers });
   const matches = await matchesRes.json();
