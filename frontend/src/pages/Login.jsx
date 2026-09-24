@@ -41,13 +41,20 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/40 to-slate-100 flex flex-col justify-center items-center py-10 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-slate-100/80 flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8 relative selection:bg-indigo-100 selection:text-indigo-900">
+      
+      {/* Defined subtle geometric grid background */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-50 bg-[radial-gradient(#94a3b8_1.2px,transparent_1.2px)] [background-size:24px_24px]"
+        aria-hidden="true"
+      />
+
+      <div className="w-full max-w-5xl relative z-10">
         <div className="bg-white rounded-3xl border border-slate-200/90 shadow-elevation overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[560px]">
           
           {/* Left Brand Panel - Desktop */}
           <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-10 text-white flex-col justify-between relative overflow-hidden">
-            {/* Soft decorative glow */}
+            {/* Soft subtle glow */}
             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -127,7 +134,7 @@ export const Login = () => {
                   <span className="font-bold text-slate-900 text-base">Campus Lost & Found</span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                  Welcome back
+                  Welcome!
                 </h1>
                 <p className="text-sm text-slate-500">
                   Enter your college email and registration number to access your account.
@@ -174,7 +181,7 @@ export const Login = () => {
                   />
                 </FormField>
 
-                {/* Sign in Button - Aligned with form edges */}
+                {/* Sign in Button */}
                 <div className="pt-2">
                   <button
                     type="submit"

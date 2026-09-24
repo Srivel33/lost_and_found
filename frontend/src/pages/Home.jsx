@@ -43,7 +43,7 @@ export const Home = () => {
             <span>Active Student Session</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-            Welcome back, {user?.name?.split(' ')[0] || 'Student'}
+            Welcome, {user?.name?.split(' ')[0] || 'Student'}!
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Campus ID: <span className="font-mono font-medium text-slate-700">{user?.regNumber}</span>

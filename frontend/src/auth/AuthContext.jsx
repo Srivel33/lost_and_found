@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.login(email, regNumber);
       setUser(response.user);
-      toast.success(`Welcome back, ${response.user.name.split(' ')[0]}!`);
+      toast.success(`Welcome, ${response.user.name.split(' ')[0]}!`);
       return response.user;
     } catch (error) {
       toast.error(error.message || 'Login failed');
