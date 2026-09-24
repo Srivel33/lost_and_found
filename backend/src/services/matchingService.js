@@ -1,4 +1,4 @@
-import { CAMPUS_ADJACENCY, STOP_WORDS, SYNONYM_MAP, POST_STATUSES } from '../config/constants.js';
+import { CAMPUS_ADJACENCY, STOP_WORDS, SYNONYM_MAP, POST_STATUSES, CATEGORY_THRESHOLDS } from '../config/constants.js';
 import { db } from '../config/db.js';
 
 export const normalizeText = (text) => {
@@ -19,12 +19,23 @@ export const calculateJaccardSimilarity = (tokensA, tokensB) => {
   return intersection.size / union.size;
 };
 
-export const calculateLocationScore = (locLost, locFound) => {
+export const calculateLocationScore = (locLost, locFound, floorLost, floorFound) => {
   if (!locLost || !locFound) return 0;
-  if (locLost.trim().toLowerCase() === locFound.trim().toLowerCase()) return 1.0;
-  
+  const lLost = locLost.trim().toLowerCase();
+  const lFound = locFound.trim().toLowerCase();
+
+  if (lLost === lFound) {
+    if (floorLost && floorFound) {
+      if (floorLost.trim().toLowerCase() === floorFound.trim().toLowerCase()) {
+        return 1.0;
+      }
+      return 0.85; // Same building, different floor
+    }
+    return 1.0;
+  }
+
   const adjList = CAMPUS_ADJACENCY[locLost] || [];
-  if (adjList.some(adj => adj.toLowerCase() === locFound.trim().toLowerCase())) {
+  if (adjList.some(adj => adj.toLowerCase() === lFound)) {
     return 0.6;
   }
   return 0;
@@ -157,7 +168,7 @@ export const scoreMatchPair = (lostPost, foundPost) => {
   
   const textScore = calculateJaccardSimilarity(tokensLost, tokensFound);
   const colorScore = calculateColorScore(lostPost.color, foundPost.color);
-  const locationScore = calculateLocationScore(lostPost.location, foundPost.location);
+  const locationScore = calculateLocationScore(lostPost.location, foundPost.location, lostPost.floor, foundPost.floor);
   const timeScore = calculateTimeScore(
     lostPost.time_start || lostPost.timeStart,
     lostPost.time_end || lostPost.timeEnd,
@@ -171,13 +182,16 @@ export const scoreMatchPair = (lostPost, foundPost) => {
   const baseScore = (0.40 * textScore) + (0.20 * colorScore) + (0.25 * locationScore) + (0.15 * timeScore);
   const totalScore = Math.min(1.0, baseScore + imageBonus);
 
-  if (totalScore >= 0.60) {
-    const band = totalScore >= 0.80 ? 'High' : 'Medium';
+  const threshold = CATEGORY_THRESHOLDS[lostPost.category] || 0.60;
+
+  if (totalScore >= threshold) {
+    const band = totalScore >= Math.min(0.95, threshold + 0.15) ? 'High' : 'Medium';
     const whyMatched = generateWhyMatchedSummary(lostPost, foundPost, { textScore, colorScore, locationScore, timeScore, imageScore });
     
     return {
       score: parseFloat(totalScore.toFixed(2)),
       band,
+      threshold,
       whyMatched,
       imageBonus: imageBonus > 0 ? parseFloat(imageBonus.toFixed(2)) : undefined
     };
@@ -203,9 +217,11 @@ export const previewMatchesForLostPost = (lostPostData, currentUserId) => {
         itemName: foundPost.item_name,
         color: foundPost.color,
         location: foundPost.location,
+        floor: foundPost.floor,
         timeFound: foundPost.time_found,
         score: matchResult.score,
         band: matchResult.band,
+        threshold: matchResult.threshold,
         whyMatched: matchResult.whyMatched,
         hasPhoto: Boolean(foundPost.photo)
       });
@@ -230,8 +246,8 @@ export const runMatchingForLostPost = (lostPost) => {
   let hasMatch = false;
 
   const insertMatch = db.prepare(`
-    INSERT INTO matches (id, lost_id, found_id, lost_user_id, found_user_id, score, band, why_matched, status, attempts_left, lockout_until, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 3, NULL, ?)
+    INSERT INTO matches (id, lost_id, found_id, lost_user_id, found_user_id, score, band, why_matched, status, attempts_left, lockout_until, handover_code, category_threshold, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 3, NULL, ?, ?, ?)
   `);
 
   const insertNotif = db.prepare(`
@@ -250,6 +266,7 @@ export const runMatchingForLostPost = (lostPost) => {
     if (matchResult) {
       hasMatch = true;
       const matchId = `match_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const handoverCode = Math.floor(100000 + Math.random() * 900000).toString();
       const now = new Date().toISOString();
 
       insertMatch.run(
@@ -261,6 +278,8 @@ export const runMatchingForLostPost = (lostPost) => {
         matchResult.score,
         matchResult.band,
         matchResult.whyMatched,
+        handoverCode,
+        matchResult.threshold,
         now
       );
 
@@ -288,8 +307,8 @@ export const runMatchingForFoundPost = (foundPost) => {
   `).all(POST_STATUSES.WITHDRAWN, POST_STATUSES.RETURNED, foundPost.user_id);
 
   const insertMatch = db.prepare(`
-    INSERT INTO matches (id, lost_id, found_id, lost_user_id, found_user_id, score, band, why_matched, status, attempts_left, lockout_until, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 3, NULL, ?)
+    INSERT INTO matches (id, lost_id, found_id, lost_user_id, found_user_id, score, band, why_matched, status, attempts_left, lockout_until, handover_code, category_threshold, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 3, NULL, ?, ?, ?)
   `);
 
   const insertNotif = db.prepare(`
@@ -307,6 +326,7 @@ export const runMatchingForFoundPost = (foundPost) => {
     const matchResult = scoreMatchPair(lostPost, foundPost);
     if (matchResult) {
       const matchId = `match_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      const handoverCode = Math.floor(100000 + Math.random() * 900000).toString();
       const now = new Date().toISOString();
 
       insertMatch.run(
@@ -318,6 +338,8 @@ export const runMatchingForFoundPost = (foundPost) => {
         matchResult.score,
         matchResult.band,
         matchResult.whyMatched,
+        handoverCode,
+        matchResult.threshold,
         now
       );
 

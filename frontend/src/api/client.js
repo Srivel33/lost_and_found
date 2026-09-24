@@ -284,6 +284,32 @@ export const api = {
     }
   },
 
+  // Anonymous In-App Relay Chat
+  async getRelayMessages(matchId) {
+    try {
+      return await fetchApi(`/matches/${matchId}/relay`);
+    } catch (err) {
+      return { handoverCode: '849201', messages: [] };
+    }
+  },
+
+  async sendRelayMessage(matchId, message) {
+    try {
+      return await fetchApi(`/matches/${matchId}/relay`, {
+        method: 'POST',
+        body: JSON.stringify({ message })
+      });
+    } catch (err) {
+      return {
+        id: `msg_${Date.now()}`,
+        matchId,
+        message,
+        isMe: true,
+        createdAt: new Date().toISOString()
+      };
+    }
+  },
+
   // Lifecycle
   async markReturned(postId, postType) {
     try {

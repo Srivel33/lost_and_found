@@ -52,6 +52,14 @@ export const register = (req, res) => {
     };
 
     const token = generateToken(user);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
     return res.status(201).json({ user, token });
   } catch (error) {
     console.error('Register error:', error);
@@ -88,6 +96,13 @@ export const login = (req, res) => {
     resetLoginAttempts(normalizedEmail);
     const token = generateToken(user);
 
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000
+    });
+
     return res.json({ user, token });
   } catch (error) {
     console.error('Login error:', error);
@@ -100,6 +115,7 @@ export const getMe = (req, res) => {
 };
 
 export const logout = (req, res) => {
+  res.clearCookie('token');
   return res.json({ success: true });
 };
 

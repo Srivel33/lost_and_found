@@ -255,3 +255,93 @@ export const rejectMatch = (req, res) => {
     return res.status(500).json({ error: 'Failed to reject match claim.' });
   }
 };
+
+export const getRelayMessages = (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const match = db.prepare('SELECT * FROM matches WHERE id = ?').get(id);
+    if (!match) return res.status(404).json({ error: 'Match not found.' });
+
+    if (match.lost_user_id !== req.user.id && match.found_user_id !== req.user.id) {
+      return res.status(403).json({ error: 'Unauthorized to view this conversation.' });
+    }
+
+    if (match.status !== 'verified' && match.status !== 'confirmed' && match.status !== 'returned') {
+      return res.status(403).json({ error: 'Anonymous relay chat opens after the security challenge is verified.' });
+    }
+
+    const messages = db.prepare(`
+      SELECT id, match_id as matchId, sender_id as senderId, sender_role as senderRole, message, created_at as createdAt
+      FROM relay_messages 
+      WHERE match_id = ? 
+      ORDER BY created_at ASC
+    `).all(id);
+
+    return res.json({
+      handoverCode: match.handover_code,
+      messages: messages.map(m => ({
+        ...m,
+        isMe: m.senderId === req.user.id
+      }))
+    });
+  } catch (error) {
+    console.error('Get relay messages error:', error);
+    return res.status(500).json({ error: 'Failed to retrieve relay messages.' });
+  }
+};
+
+export const sendRelayMessage = (req, res) => {
+  try {
+    const { id } = req.params;
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Message cannot be empty.' });
+    }
+
+    const match = db.prepare('SELECT * FROM matches WHERE id = ?').get(id);
+    if (!match) return res.status(404).json({ error: 'Match not found.' });
+
+    const isOwner = match.lost_user_id === req.user.id;
+    const isFinder = match.found_user_id === req.user.id;
+
+    if (!isOwner && !isFinder) {
+      return res.status(403).json({ error: 'Unauthorized to send message in this match.' });
+    }
+
+    if (match.status !== 'verified' && match.status !== 'confirmed' && match.status !== 'returned') {
+      return res.status(403).json({ error: 'Anonymous relay chat opens after the security challenge is verified.' });
+    }
+
+    const role = isOwner ? 'Claimant (Owner)' : 'Finder';
+    const msgId = `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const now = new Date().toISOString();
+
+    db.prepare(`
+      INSERT INTO relay_messages (id, match_id, sender_id, sender_role, message, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(msgId, id, req.user.id, role, message.trim(), now);
+
+    // Notify recipient
+    const recipientId = isOwner ? match.found_user_id : match.lost_user_id;
+    const notifId = `notif_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    db.prepare(`
+      INSERT INTO notifications (id, user_id, match_id, lost_id, message, read, created_at)
+      VALUES (?, ?, ?, ?, ?, 0, ?)
+    `).run(notifId, recipientId, id, match.lost_id, `New secure relay message from ${role}: "${message.trim().slice(0, 40)}..."`, now);
+
+    return res.status(201).json({
+      id: msgId,
+      matchId: id,
+      senderId: req.user.id,
+      senderRole: role,
+      message: message.trim(),
+      isMe: true,
+      createdAt: now
+    });
+  } catch (error) {
+    console.error('Send relay message error:', error);
+    return res.status(500).json({ error: 'Failed to send relay message.' });
+  }
+};

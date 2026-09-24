@@ -13,7 +13,7 @@ const isObviousQuestion = (question) => {
 export const createFound = (req, res) => {
   try {
     const {
-      category, itemName, description, color, location, timeFound, currentLocation, photo, phone,
+      category, itemName, description, color, location, floor, room, timeFound, currentLocation, photo, visualFingerprint, phone,
       hiddenQuestion, correctAnswer, decoyAnswers, decoy1, decoy2, decoy3
     } = req.body;
 
@@ -25,8 +25,12 @@ export const createFound = (req, res) => {
       return res.status(400).json({ error: 'Found time cannot be in the future.' });
     }
 
+    if (hiddenQuestion.trim().length < 8) {
+      return res.status(400).json({ error: 'Hidden verification question must be at least 8 characters long.' });
+    }
+
     if (isObviousQuestion(hiddenQuestion)) {
-      return res.status(400).json({ error: 'Pick a less obvious detail, like a sticker, keychain, or wallpaper.' });
+      return res.status(400).json({ error: 'Pick a less obvious detail, like a sticker, keychain, wallpaper, or unique scratch.' });
     }
 
     // Process decoys
@@ -41,6 +45,13 @@ export const createFound = (req, res) => {
       return res.status(400).json({ error: 'Three distinct decoy options are required.' });
     }
 
+    // Anti-collusion & quality check: Ensure decoys are unique and not equal to the correct answer
+    const normCorrect = correctAnswer.trim().toLowerCase();
+    const uniqueDecoys = new Set(decoys.map(d => d.toLowerCase()));
+    if (uniqueDecoys.size < 3 || uniqueDecoys.has(normCorrect)) {
+      return res.status(400).json({ error: 'Decoy options must be distinct from each other and cannot match the correct answer.' });
+    }
+
     const id = `found_${Date.now()}`;
     const createdAt = new Date().toISOString();
     const finalItemName = (itemName && itemName.trim()) || `${category} item`;
@@ -49,10 +60,10 @@ export const createFound = (req, res) => {
     db.prepare(`
       INSERT INTO found_posts (
         id, user_id, user_name, user_email, user_phone,
-        category, item_name, description, color, location,
-        time_found, current_location, photo, hidden_question,
+        category, item_name, description, color, location, floor, room,
+        time_found, current_location, photo, visual_fingerprint, hidden_question,
         correct_answer, decoy_answers, status, returned_at, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
     `).run(
       id,
       req.user.id,
@@ -64,9 +75,12 @@ export const createFound = (req, res) => {
       description.trim(),
       color,
       location,
+      floor || null,
+      room || null,
       timeFound,
       currentLocation,
       photo || null,
+      visualFingerprint || null,
       hiddenQuestion.trim(),
       correctAnswer.trim(),
       JSON.stringify(decoys),

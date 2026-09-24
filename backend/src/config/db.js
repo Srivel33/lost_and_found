@@ -160,11 +160,44 @@ export const initDatabase = () => {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS relay_messages (
+      id TEXT PRIMARY KEY,
+      match_id TEXT NOT NULL,
+      sender_id TEXT NOT NULL,
+      sender_role TEXT NOT NULL,
+      message TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+      FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_reg ON users(reg_number);
     CREATE INDEX IF NOT EXISTS idx_lost_user ON lost_posts(user_id);
     CREATE INDEX IF NOT EXISTS idx_found_user ON found_posts(user_id);
     CREATE INDEX IF NOT EXISTS idx_matches_lost_user ON matches(lost_user_id);
     CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+    CREATE INDEX IF NOT EXISTS idx_relay_match ON relay_messages(match_id);
   `);
+
+  const addCol = (tbl, col, def) => {
+    try {
+      db.exec(`ALTER TABLE ${tbl} ADD COLUMN ${col} ${def};`);
+    } catch {
+      // Column already exists
+    }
+  };
+
+  addCol('lost_posts', 'floor', 'TEXT');
+  addCol('lost_posts', 'room', 'TEXT');
+  addCol('lost_posts', 'visual_fingerprint', 'TEXT');
+
+  addCol('found_posts', 'floor', 'TEXT');
+  addCol('found_posts', 'room', 'TEXT');
+  addCol('found_posts', 'visual_fingerprint', 'TEXT');
+
+  addCol('matches', 'handover_code', 'TEXT');
+  addCol('matches', 'handover_method', "TEXT DEFAULT 'direct'");
+  addCol('matches', 'handover_confirmed_at', 'TEXT');
+  addCol('matches', 'category_threshold', 'REAL');
 };

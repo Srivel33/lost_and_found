@@ -4,7 +4,7 @@ import { runMatchingForLostPost } from '../services/matchingService.js';
 
 export const createLost = (req, res) => {
   try {
-    const { category, itemName, description, color, specialMarks, location, timeStart, timeEnd, phone, photo } = req.body;
+    const { category, itemName, description, color, specialMarks, location, floor, room, timeStart, timeEnd, phone, photo, visualFingerprint } = req.body;
 
     if (!category || !itemName || !description || !color || !location || !timeStart || !timeEnd) {
       return res.status(400).json({ error: 'Please provide all required fields.' });
@@ -26,8 +26,9 @@ export const createLost = (req, res) => {
       INSERT INTO lost_posts (
         id, user_id, user_name, user_email, user_phone,
         category, item_name, description, color, special_marks,
-        location, time_start, time_end, photo, status, returned_at, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+        location, floor, room, time_start, time_end, photo, visual_fingerprint,
+        status, returned_at, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
     `).run(
       id,
       req.user.id,
@@ -40,9 +41,12 @@ export const createLost = (req, res) => {
       color,
       specialMarks ? specialMarks.trim() : '',
       location,
+      floor || null,
+      room || null,
       timeStart,
       timeEnd,
       photo || null,
+      visualFingerprint || null,
       POST_STATUSES.OPEN,
       createdAt
     );
