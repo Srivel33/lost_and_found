@@ -1,15 +1,18 @@
 export const CAMPUS_PLACES = [
   'Block A',
   'Block B',
-  'Library',
-  'Labs',
-  'Canteen',
-  'Auditorium',
-  'Sports Ground',
-  'Bus Bay',
+  'Block C',
+  'Block D',
+  'Food Court',
+  'Playground',
   'Parking',
-  'Hostel area',
-  'Admin Block'
+  'Open Auditorium',
+  'Cafe',
+  'Lawn',
+  'Office Room',
+  'Library',
+  'Staff Room',
+  'Others'
 ];
 
 export const CAMPUS_ZONES = {
@@ -27,17 +30,27 @@ export const CAMPUS_ZONES = {
 };
 
 export const CAMPUS_ADJACENCY = {
-  'Library': ['Block A'],
-  'Block A': ['Library', 'Block B'],
-  'Block B': ['Block A', 'Labs'],
-  'Labs': ['Block B'],
-  'Canteen': ['Auditorium'],
-  'Auditorium': ['Canteen', 'Admin Block'],
-  'Admin Block': ['Auditorium'],
+  'Library': ['Block A', 'Office Room'],
+  'Block A': ['Library', 'Block B', 'Office Room'],
+  'Block B': ['Block A', 'Block C', 'Staff Room', 'Labs'],
+  'Block C': ['Block B', 'Block D', 'Staff Room'],
+  'Block D': ['Block C', 'Open Auditorium', 'Auditorium', 'Parking'],
+  'Food Court': ['Cafe', 'Open Auditorium', 'Canteen'],
+  'Canteen': ['Auditorium', 'Food Court', 'Cafe'],
+  'Auditorium': ['Canteen', 'Admin Block', 'Open Auditorium', 'Block D'],
+  'Open Auditorium': ['Food Court', 'Block D', 'Auditorium', 'Cafe'],
+  'Cafe': ['Food Court', 'Lawn', 'Canteen'],
+  'Lawn': ['Playground', 'Cafe'],
+  'Playground': ['Lawn', 'Parking', 'Sports Ground'],
+  'Parking': ['Block A', 'Block D', 'Bus Bay', 'Playground'],
   'Bus Bay': ['Parking'],
-  'Parking': ['Bus Bay'],
-  'Sports Ground': ['Hostel area'],
-  'Hostel area': ['Sports Ground']
+  'Sports Ground': ['Playground', 'Hostel area'],
+  'Hostel area': ['Sports Ground'],
+  'Labs': ['Block B'],
+  'Admin Block': ['Auditorium'],
+  'Office Room': ['Library', 'Block A'],
+  'Staff Room': ['Block C', 'Block B'],
+  'Others': []
 };
 
 export const CATEGORIES = [
@@ -72,20 +85,17 @@ export const COMMON_COLORS = [
   'Red',
   'Green',
   'Yellow',
-  'Brown',
   'Silver / Grey',
   'Gold',
-  'Purple',
-  'Orange',
-  'Pink',
-  'Multicolor',
+  'Brown',
   'Other'
 ];
 
 export const FOUND_CURRENT_LOCATIONS = [
   'With me',
   'Security desk',
-  'Department office'
+  'Department office',
+  'Staff Room'
 ];
 
 export const POST_STATUSES = {

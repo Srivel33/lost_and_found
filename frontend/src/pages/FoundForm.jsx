@@ -8,14 +8,17 @@ import { foundSchema } from '../schemas/foundSchema';
 import { FormField } from '../components/FormField';
 import { ImageUpload } from '../components/ImageUpload';
 import { PageHeader } from '../components/PageHeader';
-import { CATEGORIES, COMMON_COLORS, CAMPUS_PLACES, FOUND_CURRENT_LOCATIONS } from '../utils/constants';
-import { PlusCircle, ArrowLeft, Send, ShieldAlert, Lock, CheckCircle, ShieldCheck } from 'lucide-react';
+import { AnimatedSelect } from '../components/AnimatedSelect';
+import { CATEGORIES, CAMPUS_PLACES, FOUND_CURRENT_LOCATIONS } from '../utils/constants';
+import { PlusCircle, ArrowLeft, Send, ShieldAlert, Lock, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const FoundForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  const [customLocation, setCustomLocation] = useState('');
 
   const now = new Date();
   const toLocalISO = (d) => {
@@ -27,15 +30,16 @@ export const FoundForm = () => {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(foundSchema),
     defaultValues: {
-      category: 'earphones',
+      category: 'electronics',
       itemName: '',
       description: '',
-      color: 'Black',
-      location: 'Library',
+      color: 'Unspecified',
+      location: 'Block A',
       timeFound: toLocalISO(now),
       currentLocation: 'With me',
       photo: null,
@@ -48,15 +52,26 @@ export const FoundForm = () => {
     }
   });
 
+  const selectedCategory = watch('category');
+  const selectedLocation = watch('location');
+
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
+      const finalCategory = data.category === 'others' && customCategory.trim() 
+        ? customCategory.trim() 
+        : data.category;
+
+      const finalLocation = data.location === 'Others' && customLocation.trim()
+        ? customLocation.trim()
+        : data.location;
+
       const payload = {
-        category: data.category,
+        category: finalCategory,
         itemName: data.itemName,
         description: data.description,
-        color: data.color,
-        location: data.location,
+        color: data.color || 'Unspecified',
+        location: finalLocation,
         timeFound: new Date(data.timeFound).toISOString(),
         currentLocation: data.currentLocation,
         photo: data.photo,
@@ -115,17 +130,27 @@ export const FoundForm = () => {
               error={errors.category?.message}
               required
             >
-              <select
-                id="category"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('category')}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <AnimatedSelect
+                    id="category"
+                    options={CATEGORIES}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {selectedCategory === 'others' && (
+                <input
+                  type="text"
+                  placeholder="Please specify category (e.g. Notebook, Watch)"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  className="mt-2 w-full h-10 px-3.5 rounded-xl border border-indigo-300 text-slate-900 text-xs focus:border-indigo-600 transition-colors"
+                />
+              )}
             </FormField>
 
             <FormField
@@ -137,7 +162,7 @@ export const FoundForm = () => {
               <input
                 id="itemName"
                 type="text"
-                placeholder="e.g. Black Wireless Earbuds Case"
+                placeholder="e.g. Wireless Earbuds Case, College ID Card"
                 className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
                 {...register('itemName')}
               />
@@ -146,45 +171,34 @@ export const FoundForm = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
-              label="Primary Color"
-              id="color"
-              error={errors.color?.message}
-              required
-            >
-              <select
-                id="color"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('color')}
-              >
-                {COMMON_COLORS.map((col) => (
-                  <option key={col} value={col}>
-                    {col}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField
               label="Campus Location Found"
               id="location"
               error={errors.location?.message}
               required
             >
-              <select
-                id="location"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('location')}
-              >
-                {CAMPUS_PLACES.map((place) => (
-                  <option key={place} value={place}>
-                    {place}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="location"
+                control={control}
+                render={({ field }) => (
+                  <AnimatedSelect
+                    id="location"
+                    options={CAMPUS_PLACES}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {selectedLocation === 'Others' && (
+                <input
+                  type="text"
+                  placeholder="Please specify custom campus location"
+                  value={customLocation}
+                  onChange={(e) => setCustomLocation(e.target.value)}
+                  className="mt-2 w-full h-10 px-3.5 rounded-xl border border-indigo-300 text-slate-900 text-xs focus:border-indigo-600 transition-colors"
+                />
+              )}
             </FormField>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               label="Date & Time Found"
               id="timeFound"
@@ -198,26 +212,27 @@ export const FoundForm = () => {
                 {...register('timeFound')}
               />
             </FormField>
-
-            <FormField
-              label="Current Custody of Item"
-              id="currentLocation"
-              error={errors.currentLocation?.message}
-              required
-            >
-              <select
-                id="currentLocation"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('currentLocation')}
-              >
-                {FOUND_CURRENT_LOCATIONS.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
-            </FormField>
           </div>
+
+          <FormField
+            label="Current Custody of Item"
+            id="currentLocation"
+            error={errors.currentLocation?.message}
+            required
+          >
+            <Controller
+              name="currentLocation"
+              control={control}
+              render={({ field }) => (
+                <AnimatedSelect
+                  id="currentLocation"
+                  options={FOUND_CURRENT_LOCATIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+          </FormField>
 
           <FormField
             label="General Public Description"
@@ -262,7 +277,7 @@ export const FoundForm = () => {
             <input
               id="hiddenQuestion"
               type="text"
-              placeholder="e.g. What specific sticker is placed on the case?"
+              placeholder="e.g. What specific sticker or marking is placed on the item?"
               className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors bg-white"
               {...register('hiddenQuestion')}
             />
