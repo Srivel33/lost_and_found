@@ -24,7 +24,7 @@ export const Navbar = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
-          {/* Brand */}
+          {/* Brand Logo */}
           <div className="flex items-center gap-8">
             <Link to="/home" className="flex items-center gap-2.5 group">
               <div className="w-9 h-9 rounded-xl bg-indigo-600 group-hover:bg-indigo-700 text-white flex items-center justify-center shadow-xs transition-colors">
@@ -34,22 +34,22 @@ export const Navbar = () => {
                 <span className="font-bold text-sm tracking-tight text-slate-900 leading-tight">
                   Campus <span className="text-indigo-600">Lost & Found</span>
                 </span>
-                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
                   College Safe Portal
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation Links */}
             {isAuthenticated && (
-              <nav className="hidden md:flex items-center gap-1">
+              <nav className="hidden md:flex items-center gap-1.5">
                 {navLinks.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
                       isActive(link.to)
-                        ? 'bg-indigo-50 text-indigo-700'
+                        ? 'bg-indigo-50 text-indigo-700 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                     }`}
                   >
@@ -60,7 +60,7 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Right Action Items */}
+          {/* Right Actions */}
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
               <NotificationBell />
@@ -80,11 +80,11 @@ export const Navbar = () => {
                 </div>
               </div>
 
-              {/* Logout */}
+              {/* Sign Out Button */}
               <button
                 onClick={logout}
                 title="Sign out of portal"
-                className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                 aria-label="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const Navbar = () => {
               </Link>
               <Link
                 to="/register"
-                className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 rounded-xl shadow-xs transition-colors"
+                className="btn-primary text-xs h-9 px-4 shadow-xs"
               >
                 Register
               </Link>
@@ -109,7 +109,7 @@ export const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Navigation bar */}
+      {/* Mobile Nav bar */}
       {isAuthenticated && (
         <div className="md:hidden flex items-center justify-around border-t border-slate-100 py-1.5 bg-slate-50/70 px-2 overflow-x-auto">
           {navLinks.map((link) => {

@@ -8,7 +8,8 @@ import { lostSchema } from '../schemas/lostSchema';
 import { FormField } from '../components/FormField';
 import { ImageUpload } from '../components/ImageUpload';
 import { PageHeader } from '../components/PageHeader';
-import { CATEGORIES, COMMON_COLORS, CAMPUS_PLACES } from '../utils/constants';
+import { AnimatedSelect } from '../components/AnimatedSelect';
+import { CATEGORIES, CAMPUS_PLACES } from '../utils/constants';
 import { Search, ArrowLeft, Send, Sparkles, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -16,6 +17,8 @@ export const LostForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+  const [customLocation, setCustomLocation] = useState('');
 
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
@@ -29,16 +32,17 @@ export const LostForm = () => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(lostSchema),
     defaultValues: {
-      category: 'earphones',
+      category: 'electronics',
       itemName: '',
       description: '',
-      color: 'Black',
+      color: 'Unspecified',
       specialMarks: '',
-      location: 'Library',
+      location: 'Block A',
       timeStart: toLocalISO(oneHourAgo),
       timeEnd: toLocalISO(now),
       phone: user?.phone || '',
@@ -46,16 +50,30 @@ export const LostForm = () => {
     }
   });
 
+  const selectedCategory = watch('category');
+  const selectedLocation = watch('location');
   const descriptionValue = watch('description') || '';
 
   const onSubmit = async (data) => {
     setSubmitting(true);
     try {
+      const finalCategory = data.category === 'others' && customCategory.trim() 
+        ? customCategory.trim() 
+        : data.category;
+
+      const finalLocation = data.location === 'Others' && customLocation.trim()
+        ? customLocation.trim()
+        : data.location;
+
       const payload = {
         ...data,
+        category: finalCategory,
+        location: finalLocation,
+        color: data.color || 'Unspecified',
         timeStart: new Date(data.timeStart).toISOString(),
         timeEnd: new Date(data.timeEnd).toISOString()
       };
+
       await api.createLost(payload);
       toast.success('Lost item report posted! Searching for potential matches...');
       navigate('/matches');
@@ -105,17 +123,27 @@ export const LostForm = () => {
               error={errors.category?.message}
               required
             >
-              <select
-                id="category"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('category')}
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <AnimatedSelect
+                    id="category"
+                    options={CATEGORIES}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {selectedCategory === 'others' && (
+                <input
+                  type="text"
+                  placeholder="Please specify category (e.g. Umbrella, Calculator)"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  className="mt-2 w-full h-10 px-3.5 rounded-xl border border-indigo-300 text-slate-900 text-xs focus:border-indigo-600 transition-colors"
+                />
+              )}
             </FormField>
 
             <FormField
@@ -127,48 +155,27 @@ export const LostForm = () => {
               <input
                 id="itemName"
                 type="text"
-                placeholder="e.g. AirPods Pro Gen 2"
+                placeholder="e.g. Wireless Earbuds, Scientific Calculator"
                 className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
                 {...register('itemName')}
               />
             </FormField>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField
-              label="Primary Color"
-              id="color"
-              error={errors.color?.message}
-              required
-            >
-              <select
-                id="color"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-                {...register('color')}
-              >
-                {COMMON_COLORS.map((col) => (
-                  <option key={col} value={col}>
-                    {col}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField
-              label="Special Identifiers (Stickers, Scratches)"
+          <FormField
+            label="Special Identifiers (Stickers, Scratches, Markings)"
+            id="specialMarks"
+            error={errors.specialMarks?.message}
+            helperText="Helps verify ownership without revealing all details"
+          >
+            <input
               id="specialMarks"
-              error={errors.specialMarks?.message}
-              helperText="Helps verify ownership without revealing all details"
-            >
-              <input
-                id="specialMarks"
-                type="text"
-                placeholder="e.g. Blue anime sticker on top"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
-                {...register('specialMarks')}
-              />
-            </FormField>
-          </div>
+              type="text"
+              placeholder="e.g. Blue anime sticker on top, scratched corner"
+              className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
+              {...register('specialMarks')}
+            />
+          </FormField>
 
           <FormField
             label="Detailed Description"
@@ -186,7 +193,7 @@ export const LostForm = () => {
             {descriptionValue.length > 0 && descriptionValue.length < 25 && (
               <div className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
-                <span>Tip: Add any unique scratches, keychain, or case color for higher match accuracy.</span>
+                <span>Tip: Add any unique marks, brand, or case details for higher match accuracy.</span>
               </div>
             )}
           </FormField>
@@ -206,17 +213,27 @@ export const LostForm = () => {
             error={errors.location?.message}
             required
           >
-            <select
-              id="location"
-              className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm bg-white focus:border-indigo-600 transition-colors"
-              {...register('location')}
-            >
-              {CAMPUS_PLACES.map((place) => (
-                <option key={place} value={place}>
-                  {place}
-                </option>
-              ))}
-            </select>
+            <Controller
+              name="location"
+              control={control}
+              render={({ field }) => (
+                <AnimatedSelect
+                  id="location"
+                  options={CAMPUS_PLACES}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+              )}
+            />
+            {selectedLocation === 'Others' && (
+              <input
+                type="text"
+                placeholder="Please specify custom campus location"
+                value={customLocation}
+                onChange={(e) => setCustomLocation(e.target.value)}
+                className="mt-2 w-full h-10 px-3.5 rounded-xl border border-indigo-300 text-slate-900 text-xs focus:border-indigo-600 transition-colors"
+              />
+            )}
           </FormField>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
