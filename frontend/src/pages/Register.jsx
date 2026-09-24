@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { registerSchema } from '../schemas/authSchema';
 import { useAuth } from '../auth/AuthContext';
 import { FormField } from '../components/FormField';
-import { UserPlus, ShieldCheck, Lock, UserCheck, Trash2, ArrowRight } from 'lucide-react';
+import { UserPlus, ShieldCheck, Lock, UserCheck, Trash2 } from 'lucide-react';
 
 export const Register = () => {
   const { register: registerUser } = useAuth();
@@ -41,18 +41,18 @@ export const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center">
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-elevation overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/40 to-slate-100 flex flex-col justify-center items-center py-10 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-5xl">
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-elevation overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[560px]">
           
           {/* Left Brand Panel - Desktop */}
-          <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-indigo-900 via-indigo-850 to-slate-900 p-10 text-white flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-10 text-white flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
             <div className="relative z-10 space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-950/40 text-white">
+                <div className="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-950/50 text-white">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div>
@@ -73,9 +73,9 @@ export const Register = () => {
             </div>
 
             {/* 3 Trust Pillars */}
-            <div className="relative z-10 space-y-4 pt-8">
+            <div className="relative z-10 space-y-4 pt-6">
               <div className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                <div className="p-2 rounded-xl bg-indigo-900/80 border border-indigo-700/50 text-indigo-200 flex-shrink-0 mt-0.5">
                   <UserCheck className="w-4 h-4" />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export const Register = () => {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                <div className="p-2 rounded-xl bg-indigo-900/80 border border-indigo-700/50 text-indigo-200 flex-shrink-0 mt-0.5">
                   <Lock className="w-4 h-4" />
                 </div>
                 <div>
@@ -95,7 +95,7 @@ export const Register = () => {
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                <div className="p-2 rounded-xl bg-indigo-900/80 border border-indigo-700/50 text-indigo-200 flex-shrink-0 mt-0.5">
                   <Trash2 className="w-4 h-4" />
                 </div>
                 <div>
@@ -105,13 +105,13 @@ export const Register = () => {
               </div>
             </div>
 
-            <div className="relative z-10 pt-4 text-[11px] text-indigo-300">
+            <div className="relative z-10 pt-4 text-[11px] text-indigo-300/80">
               © 2026 Campus Student Security Portal
             </div>
           </div>
 
           {/* Right Form Card */}
-          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
+          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center bg-white">
             <div className="max-w-md w-full mx-auto space-y-5">
               
               <div className="space-y-1">
@@ -135,7 +135,7 @@ export const Register = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5" noValidate>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
                 <FormField
                   label="Full Name"
                   id="name"
@@ -205,7 +205,7 @@ export const Register = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="btn-primary w-full shadow-sm"
+                    className="w-full h-11 inline-flex items-center justify-center gap-2 px-5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none"
                   >
                     {submitting ? (
                       <>
