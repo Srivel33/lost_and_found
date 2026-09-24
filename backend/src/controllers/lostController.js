@@ -1,6 +1,7 @@
 import { db } from '../config/db.js';
 import { POST_STATUSES } from '../config/constants.js';
 import { runMatchingForLostPost } from '../services/matchingService.js';
+import { jobQueue } from '../services/backgroundWorker.js';
 
 export const createLost = (req, res) => {
   try {
@@ -70,21 +71,8 @@ export const createLost = (req, res) => {
       createdAt
     };
 
-    // Trigger heuristic matching
-    runMatchingForLostPost({
-      ...newPost,
-      user_id: newPost.userId,
-      item_name: newPost.itemName,
-      time_start: newPost.timeStart,
-      time_end: newPost.timeEnd,
-      special_marks: newPost.specialMarks
-    });
-
-    // Refresh post status in case it was updated to matched
-    const updatedPost = db.prepare('SELECT status FROM lost_posts WHERE id = ?').get(id);
-    if (updatedPost) {
-      newPost.status = updatedPost.status;
-    }
+    // Enqueue background matching job
+    jobQueue.enqueueLostPostMatching(id);
 
     return res.status(201).json(newPost);
   } catch (error) {

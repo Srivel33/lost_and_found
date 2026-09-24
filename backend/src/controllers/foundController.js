@@ -1,6 +1,7 @@
 import { db } from '../config/db.js';
 import { POST_STATUSES } from '../config/constants.js';
 import { runMatchingForFoundPost } from '../services/matchingService.js';
+import { jobQueue } from '../services/backgroundWorker.js';
 
 const OBVIOUS_KEYWORDS = ['color', 'colour', 'brand', 'company', 'make', 'name of brand', 'what brand', 'what color'];
 
@@ -109,13 +110,8 @@ export const createFound = (req, res) => {
       createdAt
     };
 
-    // Trigger heuristic matching
-    runMatchingForFoundPost({
-      ...newPost,
-      user_id: newPost.userId,
-      item_name: newPost.itemName,
-      time_found: newPost.timeFound
-    });
+    // Enqueue background matching job
+    jobQueue.enqueueFoundPostMatching(id);
 
     return res.status(201).json(newPost);
   } catch (error) {

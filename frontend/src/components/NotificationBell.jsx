@@ -21,8 +21,26 @@ export const NotificationBell = () => {
 
   useEffect(() => {
     fetchNotifs();
-    const interval = setInterval(fetchNotifs, 30000);
-    return () => clearInterval(interval);
+    
+    // Server-Sent Events for real-time notifications
+    const sse = new EventSource('/api/notifications/stream');
+    
+    sse.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'NEW_NOTIFICATION') {
+          fetchNotifs();
+        }
+      } catch (e) {
+        console.error('SSE Error:', e);
+      }
+    };
+
+    const interval = setInterval(fetchNotifs, 60000); // Fallback poll every 60s
+    return () => {
+      clearInterval(interval);
+      sse.close();
+    };
   }, []);
 
   useEffect(() => {
