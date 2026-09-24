@@ -5,13 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginSchema } from '../schemas/authSchema';
 import { useAuth } from '../auth/AuthContext';
 import { FormField } from '../components/FormField';
-import { LogIn, ShieldAlert, Sparkles, KeyRound } from 'lucide-react';
-
-const DEMO_ACCOUNTS = [
-  { name: 'Meena Iyer (Lost Case)', email: 'meena@snsct.org', reg: '713524CS102' },
-  { name: 'Arun Kumar (Finder)', email: 'arun@snsct.org', reg: '713524CS101' },
-  { name: 'Shahith (Student Demo)', email: 'shahith@snsct.org', reg: '713524AM120' }
-];
+import { LogIn, ShieldCheck, Lock, Sparkles, UserCheck, Trash2, ArrowRight } from 'lucide-react';
 
 export const Login = () => {
   const { login } = useAuth();
@@ -23,7 +17,6 @@ export const Login = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -47,131 +40,175 @@ export const Login = () => {
     }
   };
 
-  const handleFillDemo = (email, reg) => {
-    setValue('email', email, { shouldValidate: true });
-    setValue('regNumber', reg, { shouldValidate: true });
-    setAuthError('');
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-indigo-50/30 to-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 px-4">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 mb-4">
-          <KeyRound className="w-7 h-7" />
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-          Campus Lost & Found
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Sign in with your verified college credentials
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-elevation overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+          
+          {/* Left Brand Panel - Desktop */}
+          <div className="hidden lg:flex lg:col-span-5 bg-gradient-to-br from-indigo-900 via-indigo-850 to-slate-900 p-10 text-white flex-col justify-between relative overflow-hidden">
+            {/* Background decoration */}
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-indigo-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow-xl shadow-slate-200/60 rounded-2xl sm:px-10 border border-slate-100">
-          {authError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3">
-              <ShieldAlert className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-red-700 font-medium">
-                {authError}
+            <div className="relative z-10 space-y-6">
+              {/* Brand Logo */}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-950/40 text-white">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold tracking-tight text-white leading-tight">
+                    Campus Lost & Found
+                  </h2>
+                  <p className="text-[11px] font-medium text-indigo-200">
+                    College Safe Network
+                  </p>
+                </div>
+              </div>
+
+              {/* Quote */}
+              <div className="pt-4 border-t border-indigo-800/60">
+                <blockquote className="text-sm font-medium text-indigo-100 italic leading-relaxed">
+                  "Every lost item carries a memory. Connect students, rebuild trust, and reunite campus belongings safely."
+                </blockquote>
               </div>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-            <FormField
-              label="College Email"
-              id="email"
-              error={errors.email?.message}
-              required
-            >
-              <input
-                id="email"
-                type="email"
-                placeholder="e.g. name@snsct.org"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 placeholder:text-slate-400 text-sm shadow-sm"
-                {...register('email')}
-              />
-            </FormField>
+            {/* 3 Trust Pillars */}
+            <div className="relative z-10 space-y-4 pt-8">
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Verified Students Only</p>
+                  <p className="text-[11px] text-indigo-200/80">Only campus enrolled credentials can log in.</p>
+                </div>
+              </div>
 
-            <FormField
-              label="Registration Number"
-              id="regNumber"
-              error={errors.regNumber?.message}
-              helperText="e.g. 713524AM120 (Department & Roll Number)"
-              required
-            >
-              <input
-                id="regNumber"
-                type="text"
-                placeholder="e.g. 713524AM120"
-                className="w-full px-4 py-2.5 uppercase rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-slate-900 placeholder:text-slate-400 text-sm shadow-sm tracking-wider"
-                {...register('regNumber')}
-              />
-            </FormField>
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Zero Public Postings</p>
+                  <p className="text-[11px] text-indigo-200/80">Found items remain strictly private to protect owners.</p>
+                </div>
+              </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md shadow-indigo-200 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {submitting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="w-4 h-4" />
-                    <span>Sign in</span>
-                  </>
-                )}
-              </button>
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded-lg bg-indigo-800/80 text-indigo-200 flex-shrink-0 mt-0.5">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-white">Automatic Retention Purge</p>
+                  <p className="text-[11px] text-indigo-200/80">Records are automatically cleared after resolution.</p>
+                </div>
+              </div>
             </div>
-          </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
-              First time here?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
-              >
-                Create student profile
-              </Link>
-            </p>
+            {/* Footer note */}
+            <div className="relative z-10 pt-4 text-[11px] text-indigo-300">
+              © 2026 Campus Student Security Portal
+            </div>
           </div>
 
-          {/* 1-Click Demo Accounts Pill Tray */}
-          <div className="mt-8 pt-6 border-t border-slate-100">
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quick Demo Accounts</span>
-            </div>
-            <div className="space-y-2">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  onClick={() => handleFillDemo(acc.email, acc.reg)}
-                  className="w-full text-left p-2.5 rounded-lg bg-slate-50 hover:bg-indigo-50/60 border border-slate-200 hover:border-indigo-200 transition-colors flex items-center justify-between group"
-                >
-                  <div>
-                    <p className="text-xs font-semibold text-slate-800 group-hover:text-indigo-700">
-                      {acc.name}
-                    </p>
-                    <p className="text-[11px] text-slate-500 font-mono">
-                      {acc.email} | {acc.reg}
-                    </p>
+          {/* Right Form Card */}
+          <div className="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
+            <div className="max-w-md w-full mx-auto space-y-6">
+              
+              {/* Header on mobile & form header */}
+              <div className="space-y-1.5">
+                <div className="lg:hidden flex items-center gap-2.5 mb-4">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+                    <ShieldCheck className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-medium text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                    Fill
-                  </span>
-                </button>
-              ))}
+                  <span className="font-bold text-slate-900 text-base">Campus Lost & Found</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                  Welcome back
+                </h1>
+                <p className="text-sm text-slate-500">
+                  Enter your college email and registration number to access your account.
+                </p>
+              </div>
+
+              {/* Error Banner */}
+              {authError && (
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2.5 text-xs text-rose-800 animate-fadeIn" role="alert">
+                  <span className="font-semibold">{authError}</span>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+                <FormField
+                  label="College Email"
+                  id="email"
+                  error={errors.email?.message}
+                  required
+                >
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="e.g. name@snsct.org"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
+                    {...register('email')}
+                  />
+                </FormField>
+
+                <FormField
+                  label="Registration Number"
+                  id="regNumber"
+                  error={errors.regNumber?.message}
+                  helperText="Official student roll number (e.g. 713524CS102)"
+                  required
+                >
+                  <input
+                    id="regNumber"
+                    type="text"
+                    placeholder="e.g. 713524CS102"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 uppercase tracking-wider text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
+                    {...register('regNumber')}
+                  />
+                </FormField>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn-primary w-full shadow-sm"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Authenticating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogIn className="w-4 h-4" />
+                        <span>Sign In to Portal</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Bottom Switch Link */}
+              <div className="pt-4 border-t border-slate-100 text-center text-xs text-slate-600">
+                <span>New to the campus portal? </span>
+                <Link
+                  to="/register"
+                  className="font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                >
+                  Create student profile &rarr;
+                </Link>
+              </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </div>

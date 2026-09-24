@@ -22,8 +22,8 @@ const AppLayout = () => {
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-800">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900 font-sans">
+      {!isAuthPage && <Navbar />}
 
       <main className="flex-1">
         <Routes>
@@ -98,20 +98,23 @@ const AppLayout = () => {
       </main>
 
       {/* Global Campus Portal Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Campus Lost & Found System — Privacy-Preserving College Network</p>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={resetDemoData}
-              className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Demo Data</span>
-            </button>
+      {!isAuthPage && (
+        <footer className="bg-white border-t border-slate-200/80 py-5 text-center text-xs text-slate-500">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p>© 2026 Campus Lost & Found System — Privacy-Preserving College Network</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={resetDemoData}
+                className="inline-flex items-center gap-1.5 text-slate-500 hover:text-indigo-700 font-medium transition-colors"
+                title="Reset local demo dataset"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset Demo Data</span>
+              </button>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 };
@@ -128,7 +131,8 @@ export const App = () => {
             color: '#f8fafc',
             borderRadius: '12px',
             fontSize: '13px',
-            fontWeight: 500
+            fontWeight: 500,
+            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'
           }
         }}
       />

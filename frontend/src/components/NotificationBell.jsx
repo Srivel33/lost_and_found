@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Check, ExternalLink } from 'lucide-react';
+import { Bell, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { formatRelativeTime } from '../utils/format';
@@ -21,7 +21,6 @@ export const NotificationBell = () => {
 
   useEffect(() => {
     fetchNotifs();
-    // Poll every 30 seconds
     const interval = setInterval(fetchNotifs, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -63,36 +62,36 @@ export const NotificationBell = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-600"
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
+          <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white shadow-xs ring-2 ring-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white p-3 shadow-2xl ring-1 ring-slate-900/10 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white p-3 shadow-elevation border border-slate-200/90 z-50 animate-in fade-in zoom-in-95 duration-100">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2 px-2">
-            <h3 className="text-sm font-bold text-slate-800">Campus Alerts</h3>
+            <h3 className="text-sm font-bold text-slate-900">Campus Alerts</h3>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
                 disabled={loading}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50"
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 disabled:opacity-50 transition-colors"
               >
                 Mark all read
               </button>
             )}
           </div>
 
-          <div className="divide-y divide-slate-50 max-h-80 overflow-y-auto mt-1">
+          <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto mt-1">
             {notifications.length === 0 ? (
-              <div className="py-6 text-center text-xs text-slate-400">
-                No notifications yet.
+              <div className="py-8 text-center text-xs text-slate-400">
+                No alerts at this time.
               </div>
             ) : (
               notifications.slice(0, 5).map((notif) => (
@@ -139,9 +138,9 @@ export const NotificationBell = () => {
             <Link
               to="/matches"
               onClick={() => setOpen(false)}
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 block py-1"
+              className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 block py-1"
             >
-              View all possible matches &rarr;
+              View all potential matches &rarr;
             </Link>
           </div>
         </div>
