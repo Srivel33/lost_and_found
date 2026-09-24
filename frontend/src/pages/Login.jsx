@@ -160,7 +160,7 @@ export const Login = () => {
                     id="email"
                     type="email"
                     placeholder="e.g. name@snsct.org"
-                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 transition-all bg-white hover:bg-slate-50"
                     {...register('email')}
                   />
                 </FormField>
@@ -176,7 +176,7 @@ export const Login = () => {
                     id="regNumber"
                     type="text"
                     placeholder="e.g. 713524CS102"
-                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 uppercase tracking-wider text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors"
+                    className="w-full h-11 px-3.5 rounded-xl border border-slate-300 uppercase tracking-wider text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/10 transition-all bg-white hover:bg-slate-50"
                     {...register('regNumber')}
                   />
                 </FormField>
@@ -186,7 +186,7 @@ export const Login = () => {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full h-11 inline-flex items-center justify-center gap-2 px-5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 shadow-sm transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none"
+                    className="btn-primary w-full shadow-[0_8px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_12px_25px_rgba(79,70,229,0.4)]"
                   >
                     {submitting ? (
                       <>
