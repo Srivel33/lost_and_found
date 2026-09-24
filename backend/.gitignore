@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Python (if applicable)
+.venv/
+__pycache__/
+
+# Environment
+.env
+
+# Database
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Uploads
+uploads/
+
+# IDE & OS
+.vscode/
+.DS_Store
+Thumbs.db
