@@ -97,9 +97,9 @@ describe('Matching Scoring Engine', () => {
 
     it('creates Medium band when score is between 0.60 and 0.79', () => {
       const lostPost = {
-        category: 'phone',
-        itemName: 'Samsung Mobile',
-        description: 'black phone lost in hallway',
+        category: 'bottle',
+        itemName: 'Samsung Bottle',
+        description: 'black bottle lost in hallway',
         color: 'Black',
         location: 'Block A',
         timeStart: '2026-09-24T07:00:00.000Z',
@@ -107,9 +107,9 @@ describe('Matching Scoring Engine', () => {
       };
 
       const foundPost = {
-        category: 'phone',
-        itemName: 'Android Phone',
-        description: 'black mobile with case',
+        category: 'bottle',
+        itemName: 'Android Flask',
+        description: 'black bottle with case',
         color: 'Black',
         location: 'Block B', // adjacent (0.6 * 0.25 = 0.15)
         timeFound: '2026-09-24T08:00:00.000Z'
