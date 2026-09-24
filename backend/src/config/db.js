@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import { DatabaseSync } from 'node:sqlite';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -14,11 +14,50 @@ if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-export const db = new Database(dbPath);
+class SQLiteDB {
+  constructor(filepath) {
+    this.rawDb = new DatabaseSync(filepath);
+    this.pragma('journal_mode = WAL');
+    this.pragma('foreign_keys = ON');
+  }
 
-// Optimize SQLite for high performance and durability
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+  pragma(statement) {
+    try {
+      this.rawDb.exec(`PRAGMA ${statement};`);
+    } catch {
+      // ignore
+    }
+  }
+
+  exec(sql) {
+    return this.rawDb.exec(sql);
+  }
+
+  prepare(sql) {
+    const stmt = this.rawDb.prepare(sql);
+    return {
+      all: (...args) => stmt.all(...args),
+      get: (...args) => stmt.get(...args),
+      run: (...args) => stmt.run(...args)
+    };
+  }
+
+  transaction(fn) {
+    return (...args) => {
+      this.rawDb.exec('BEGIN TRANSACTION');
+      try {
+        const result = fn(...args);
+        this.rawDb.exec('COMMIT');
+        return result;
+      } catch (err) {
+        this.rawDb.exec('ROLLBACK');
+        throw err;
+      }
+    };
+  }
+}
+
+export const db = new SQLiteDB(dbPath);
 
 export const initDatabase = () => {
   db.exec(`
