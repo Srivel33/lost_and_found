@@ -198,7 +198,8 @@ export const getVerifiedContact = (req, res) => {
       finderName: foundItem.user_name,
       finderPhone: foundItem.user_phone,
       finderEmail: foundItem.user_email,
-      currentLocation: foundItem.current_location
+      currentLocation: foundItem.current_location,
+      handoverCode: match.handover_code
     });
   } catch (error) {
     console.error('Get verified contact error:', error);

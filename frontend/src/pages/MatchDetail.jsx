@@ -8,6 +8,8 @@ import { ContactCard } from '../components/ContactCard';
 import { CooldownBanner } from '../components/CooldownBanner';
 import { Skeleton } from '../components/Skeleton';
 import { PageHeader } from '../components/PageHeader';
+import { RelayChat } from '../components/RelayChat';
+import { HandoverCode } from '../components/HandoverCode';
 import { formatDate } from '../utils/format';
 import { ArrowLeft, MapPin, Calendar, Compass, ShieldCheck, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -222,16 +224,20 @@ export const MatchDetail = () => {
         {/* Right Column: Challenge or Contact Card */}
         <div className="lg:col-span-5 sticky top-24">
           {isVerified && contact ? (
-            <ContactCard
-              finderName={contact.finderName}
-              finderPhone={contact.finderPhone}
-              finderEmail={contact.finderEmail}
-              currentLocation={contact.currentLocation}
-              onConfirmMine={handleConfirmMine}
-              onNotMine={handleNotMine}
-              submitting={submittingAction}
-              status={match.status}
-            />
+            <div className="space-y-6">
+              {contact.handoverCode && <HandoverCode code={contact.handoverCode} />}
+              <RelayChat matchId={matchId} />
+              <ContactCard
+                finderName={contact.finderName}
+                finderPhone={contact.finderPhone}
+                finderEmail={contact.finderEmail}
+                currentLocation={contact.currentLocation}
+                onConfirmMine={handleConfirmMine}
+                onNotMine={handleNotMine}
+                submitting={submittingAction}
+                status={match.status}
+              />
+            </div>
           ) : (
             <HiddenQuestion
               question={match.hiddenQuestion}

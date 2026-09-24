@@ -1,4 +1,4 @@
-import { CAMPUS_ADJACENCY } from '../utils/constants';
+import { CAMPUS_ADJACENCY, CATEGORY_THRESHOLDS } from '../utils/constants';
 
 const STOP_WORDS = new Set([
   'a', 'an', 'the', 'in', 'on', 'at', 'with', 'for', 'to', 'of', 'and', 'or', 'is', 'it', 'my', 'near', 'from', 'left', 'found', 'lost'
@@ -7,26 +7,85 @@ const STOP_WORDS = new Set([
 const SYNONYM_MAP = {
   'navy': 'blue',
   'darkblue': 'blue',
+  'silver': 'grey',
+  'gray': 'grey',
+  'slate': 'grey',
+  'ash': 'grey',
+  'golden': 'gold',
+  
+  // Bags
   'backpack': 'bag',
   'sack': 'bag',
   'duffle': 'bag',
+  'tote': 'bag',
+  'kitbag': 'bag',
+  
+  // Wallets & Currency
   'purse': 'wallet',
   'cardholder': 'wallet',
+  'billfold': 'wallet',
+  'cash': 'wallet',
+  'money': 'wallet',
+  'currency': 'wallet',
+  'notes': 'wallet',
+  'rupees': 'wallet',
+  
+  // Audio & Earphones
   'earbuds': 'earphones',
   'buds': 'earphones',
   'airpods': 'earphones',
   'headphones': 'earphones',
+  'headset': 'earphones',
+  'neckband': 'earphones',
+  'tws': 'earphones',
+  
+  // Phones
   'mobile': 'phone',
   'smartphone': 'phone',
   'cellphone': 'phone',
   'galaxy': 'phone',
   'iphone': 'phone',
+  'oneplus': 'phone',
+  'redmi': 'phone',
+  
+  // Laptops, Chargers, Adapters
+  'charger': 'adapter',
+  'power': 'adapter',
+  'cable': 'adapter',
+  'cord': 'adapter',
+  'wire': 'adapter',
+  'brick': 'adapter',
+  'typec': 'adapter',
+  'macbook': 'laptop',
+  'dell': 'laptop',
+  'hp': 'laptop',
+  'lenovo': 'laptop',
+  'thinkpad': 'laptop',
+  'notebook': 'laptop',
+  
+  // Bottles
   'flask': 'bottle',
   'sipper': 'bottle',
   'hydroflask': 'bottle',
+  'thermos': 'bottle',
+  'tumbler': 'bottle',
+  
+  // ID Cards
   'idcard': 'id_card',
   'identity': 'id_card',
-  'lanyard': 'id_card'
+  'lanyard': 'id_card',
+  'badge': 'id_card',
+  'smartcard': 'id_card',
+
+  // Stationery
+  'pen': 'stationery',
+  'pencil': 'stationery',
+  'calculator': 'stationery',
+  'casio': 'stationery',
+  'drafter': 'stationery',
+  'compass': 'stationery',
+  'scale': 'stationery',
+  'ruler': 'stationery'
 };
 
 export const normalizeText = (text) => {
@@ -49,12 +108,23 @@ export const calculateJaccardSimilarity = (tokensA, tokensB) => {
   return intersection.size / union.size;
 };
 
-export const calculateLocationScore = (locLost, locFound) => {
+export const calculateLocationScore = (locLost, locFound, floorLost, floorFound) => {
   if (!locLost || !locFound) return 0;
-  if (locLost.trim().toLowerCase() === locFound.trim().toLowerCase()) return 1.0;
+  const lLost = locLost.trim().toLowerCase();
+  const lFound = locFound.trim().toLowerCase();
+
+  if (lLost === lFound) {
+    if (floorLost && floorFound) {
+      if (floorLost.trim().toLowerCase() === floorFound.trim().toLowerCase()) {
+        return 1.0;
+      }
+      return 0.85; // Same building, different floor
+    }
+    return 1.0;
+  }
   
   const adjList = CAMPUS_ADJACENCY[locLost] || [];
-  if (adjList.some(adj => adj.toLowerCase() === locFound.trim().toLowerCase())) {
+  if (adjList.some(adj => adj.toLowerCase() === lFound)) {
     return 0.6;
   }
   return 0;
@@ -190,7 +260,7 @@ export const scoreMatchPair = (lostPost, foundPost) => {
   
   const textScore = calculateJaccardSimilarity(tokensLost, tokensFound);
   const colorScore = calculateColorScore(lostPost.color, foundPost.color);
-  const locationScore = calculateLocationScore(lostPost.location, foundPost.location);
+  const locationScore = calculateLocationScore(lostPost.location, foundPost.location, lostPost.floor, foundPost.floor);
   const timeScore = calculateTimeScore(
     lostPost.time_start || lostPost.timeStart,
     lostPost.time_end || lostPost.timeEnd,
@@ -205,13 +275,16 @@ export const scoreMatchPair = (lostPost, foundPost) => {
   const baseScore = (0.40 * textScore) + (0.20 * colorScore) + (0.25 * locationScore) + (0.15 * timeScore);
   const totalScore = Math.min(1.0, baseScore + imageBonus);
 
-  if (totalScore >= 0.60) {
-    const band = totalScore >= 0.80 ? 'High' : 'Medium';
+  const threshold = CATEGORY_THRESHOLDS[lostPost.category] || 0.60;
+
+  if (totalScore >= threshold) {
+    const band = totalScore >= Math.min(0.95, threshold + 0.15) ? 'High' : 'Medium';
     const whyMatched = generateWhyMatchedSummary(lostPost, foundPost, { textScore, colorScore, locationScore, timeScore, imageScore });
     
     return {
       score: parseFloat(totalScore.toFixed(2)),
       band,
+      threshold,
       whyMatched,
       imageBonus: imageBonus > 0 ? parseFloat(imageBonus.toFixed(2)) : undefined
     };
