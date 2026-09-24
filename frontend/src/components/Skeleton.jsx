@@ -6,7 +6,7 @@ export const Skeleton = ({ className = '', count = 1 }) => {
       {Array.from({ length: count }).map((_, idx) => (
         <div
           key={idx}
-          className={`animate-pulse bg-slate-200 rounded-xl ${className}`}
+          className={`shimmer rounded-xl ${className}`}
           aria-hidden="true"
         />
       ))}

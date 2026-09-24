@@ -226,13 +226,22 @@ export const LostForm = () => {
             error={errors.description?.message}
             required
           >
-            <textarea
-              id="description"
-              rows={3}
-              placeholder="Describe distinguishing features, brand marks, accessories, or context (10 to 500 characters)..."
-              className="w-full p-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors resize-none"
-              {...register('description')}
-            />
+            <div className="relative">
+              <textarea
+                id="description"
+                rows={3}
+                placeholder="Describe distinguishing features, brand marks, accessories, or context (10 to 500 characters)..."
+                className="w-full p-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors resize-none"
+                {...register('description')}
+              />
+              <span className={`absolute right-2.5 bottom-2.5 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded ${
+                descriptionValue.length > 500
+                  ? 'bg-rose-100 text-rose-700'
+                  : 'bg-slate-100 text-slate-500'
+              }`}>
+                {descriptionValue.length}/500
+              </span>
+            </div>
             {descriptionValue.length > 0 && descriptionValue.length < 25 && (
               <div className="mt-1.5 flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
@@ -244,10 +253,50 @@ export const LostForm = () => {
 
         {/* Section 2: Location & Time */}
         <div className="card-surface space-y-5">
-          <div className="border-b border-slate-100 pb-3">
+          <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               2. Where & When Lost
             </h2>
+            {/* Quick Time Preset Buttons */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] uppercase font-bold text-slate-400 hidden sm:inline">Presets:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const end = new Date();
+                  const start = new Date(end.getTime() - 60 * 60 * 1000);
+                  setValue('timeStart', toLocalISO(start));
+                  setValue('timeEnd', toLocalISO(end));
+                }}
+                className="px-2 py-0.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+              >
+                Past 1h
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const end = new Date();
+                  const start = new Date(end.getTime() - 4 * 60 * 60 * 1000);
+                  setValue('timeStart', toLocalISO(start));
+                  setValue('timeEnd', toLocalISO(end));
+                }}
+                className="px-2 py-0.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+              >
+                Today (Past 4h)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const end = new Date();
+                  const start = new Date(end.getTime() - 24 * 60 * 60 * 1000);
+                  setValue('timeStart', toLocalISO(start));
+                  setValue('timeEnd', toLocalISO(end));
+                }}
+                className="px-2 py-0.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+              >
+                Yesterday
+              </button>
+            </div>
           </div>
 
           <FormField

@@ -144,7 +144,7 @@ export const MatchDetail = () => {
           title={`Match for: ${match.lostItemName}`}
           subtitle="Review the found item report and pass the verification challenge to coordinate hand-off."
         >
-          <ConfidenceBadge band={match.band} />
+          <ConfidenceBadge band={match.band} score={match.score} />
         </PageHeader>
       </div>
 

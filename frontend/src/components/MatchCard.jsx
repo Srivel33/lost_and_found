@@ -21,7 +21,7 @@ export const MatchCard = ({ match }) => {
             </span>
             <StatusPill status={match.status} />
           </div>
-          <ConfidenceBadge band={match.band} />
+          <ConfidenceBadge band={match.band} score={match.score} />
         </div>
 
         {/* Title */}

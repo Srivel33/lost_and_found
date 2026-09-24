@@ -8,11 +8,27 @@ export const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const location = useLocation();
 
+  const [matchCount, setMatchCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchCount = async () => {
+      try {
+        const matches = await import('../api/client').then(m => m.api.getMyMatches());
+        const unverified = (matches || []).filter(m => m.status === 'pending' || m.status === 'verified').length;
+        setMatchCount(unverified);
+      } catch {
+        // ignore
+      }
+    };
+    fetchCount();
+  }, [isAuthenticated, location.pathname]);
+
   const navLinks = [
     { to: '/home', label: 'Home', icon: Home },
     { to: '/lost', label: 'Report Lost', icon: Search },
     { to: '/found', label: 'Report Found', icon: PlusCircle },
-    { to: '/matches', label: 'Matches', icon: Sparkles },
+    { to: '/matches', label: 'Matches', icon: Sparkles, badge: matchCount > 0 ? matchCount : null },
     { to: '/my-posts', label: 'My Posts', icon: Layers },
     { to: '/privacy', label: 'Privacy', icon: Shield }
   ];
@@ -47,13 +63,18 @@ export const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 ${
                       isActive(link.to)
                         ? 'bg-indigo-50 text-indigo-700 shadow-xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
                     }`}
                   >
-                    {link.label}
+                    <span>{link.label}</span>
+                    {link.badge && (
+                      <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-indigo-600 text-white shadow-xs">
+                        {link.badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </nav>
@@ -119,13 +140,20 @@ export const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`flex flex-col items-center py-1 px-2.5 rounded-lg text-[10px] font-medium transition-colors ${
+                className={`flex flex-col items-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors relative ${
                   active
                     ? 'text-indigo-700 font-semibold'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Icon className={`w-4 h-4 mb-0.5 ${active ? 'text-indigo-600' : 'text-slate-500'}`} />
+                <div className="relative">
+                  <Icon className={`w-4 h-4 mb-0.5 ${active ? 'text-indigo-600' : 'text-slate-500'}`} />
+                  {link.badge && (
+                    <span className="absolute -top-1 -right-2 px-1 py-0.2 rounded-full text-[8px] font-black bg-indigo-600 text-white">
+                      {link.badge}
+                    </span>
+                  )}
+                </div>
                 <span>{link.label}</span>
               </Link>
             );

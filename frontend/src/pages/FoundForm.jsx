@@ -31,6 +31,7 @@ export const FoundForm = () => {
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors }
   } = useForm({
     resolver: zodResolver(foundSchema),
@@ -54,6 +55,7 @@ export const FoundForm = () => {
 
   const selectedCategory = watch('category');
   const selectedLocation = watch('location');
+  const descriptionValue = watch('description') || '';
 
   const onSubmit = async (data) => {
     setSubmitting(true);
@@ -205,12 +207,38 @@ export const FoundForm = () => {
               error={errors.timeFound?.message}
               required
             >
-              <input
-                id="timeFound"
-                type="datetime-local"
-                className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-indigo-600 transition-colors"
-                {...register('timeFound')}
-              />
+              <div className="space-y-1.5">
+                <input
+                  id="timeFound"
+                  type="datetime-local"
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-300 text-slate-900 text-sm focus:border-indigo-600 transition-colors"
+                  {...register('timeFound')}
+                />
+                <div className="flex items-center gap-1.5 pt-0.5">
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Presets:</span>
+                  <button
+                    type="button"
+                    onClick={() => setValue('timeFound', toLocalISO(new Date()))}
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+                  >
+                    Just Now
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue('timeFound', toLocalISO(new Date(Date.now() - 60 * 60 * 1000)))}
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+                  >
+                    1h Ago
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue('timeFound', toLocalISO(new Date(Date.now() - 24 * 60 * 60 * 1000)))}
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 text-[10px] font-semibold rounded-md border border-slate-200 transition-colors"
+                  >
+                    Yesterday
+                  </button>
+                </div>
+              </div>
             </FormField>
           </div>
 
@@ -241,13 +269,22 @@ export const FoundForm = () => {
             helperText="Provide general info without revealing the secret challenge answer"
             required
           >
-            <textarea
-              id="description"
-              rows={3}
-              placeholder="e.g. Found on desk in 2nd floor library reading room (10 to 500 chars)..."
-              className="w-full p-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors resize-none"
-              {...register('description')}
-            />
+            <div className="relative">
+              <textarea
+                id="description"
+                rows={3}
+                placeholder="e.g. Found on desk in 2nd floor library reading room (10 to 500 chars)..."
+                className="w-full p-3.5 rounded-xl border border-slate-300 text-slate-900 placeholder:text-slate-400 text-sm focus:border-indigo-600 transition-colors resize-none"
+                {...register('description')}
+              />
+              <span className={`absolute right-2.5 bottom-2.5 text-[10px] font-mono font-medium px-1.5 py-0.5 rounded ${
+                descriptionValue.length > 500
+                  ? 'bg-rose-100 text-rose-700'
+                  : 'bg-slate-100 text-slate-500'
+              }`}>
+                {descriptionValue.length}/500
+              </span>
+            </div>
           </FormField>
         </div>
 
